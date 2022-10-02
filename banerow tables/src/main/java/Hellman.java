@@ -16,15 +16,14 @@ public class Hellman extends BigClass {
         this.t = t;
     }
 
-    public static String solveHash(byte[] encodedHash) throws Exception {
+    public static boolean solveHash(byte[] encodedHash) throws Exception {
         //reducing cipher text
 
-        System.out.println();
         String reducedCT = reductionFunction(encodedHash, 0);
 
         //
         // searching endpoints
-        String potentialOpenText = "";
+        String potentialOpenText = null;
         for(int i = 0; i < t; i++) {
             for (String endpoint : theTable.values()) {
                 if (reducedCT.equals(endpoint)) {
@@ -34,17 +33,17 @@ public class Hellman extends BigClass {
                 }
             }
                     if (potentialOpenText != null) {
-                        System.out.println("correct input was " + potentialOpenText + " with hash " + toHex(encodedHash));
-                        return potentialOpenText;
+                        System.out.println("correct input was " + potentialOpenText + " with hash \t\t\t\t\t" + new String( toHex(encodedHash)));
+                        return true;
                     } else {
-                        System.out.println(" no endpoint was matchig, proceeding to hash potential");
+//                        System.out.println(" no endpoint was matchig for: " + reducedCT +" , proceeding to hash ");
                         reducedCT = reductionFunction(stringToSHA(reducedCT), 0);
                     }
 
             }
 
-        System.out.println("unable to find plaintext for cipher text: " + toHex(encodedHash));
-        return null;
+        System.out.println("unable to find plaintext for cipher text: \t\t" + new String( toHex(encodedHash)));
+        return false;
     }
 
     private static String iterateChain(byte[] cipherText, String endPoint) throws Exception {
@@ -61,7 +60,7 @@ public class Hellman extends BigClass {
         for (int i = 0; i < t; i++) {
              currentByte = stringToSHA(currentString);
             if (Arrays.equals(currentByte, cipherText)) {
-                return startingPoint;
+                return currentString;
             } else {
                 currentString = reductionFunction(currentByte, 0);
                 //currentByte = stringToSHA(currentString);
@@ -74,8 +73,8 @@ public class Hellman extends BigClass {
     public static void generateHashTables() throws Exception {
 
         do {
-//            String startingPoint = generateID();
-            String startingPoint = "00000092202";
+            String startingPoint = generateID();
+//            String startingPoint = "00000092202";
             byte[] current = stringToSHA(startingPoint);
 
             for (int j = 0; j < t; j++) {
