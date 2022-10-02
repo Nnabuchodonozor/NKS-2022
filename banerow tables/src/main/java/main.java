@@ -41,14 +41,18 @@ public class main {
 
             }
 
-            Hellman hellman = new Hellman();
-            hellman.setMT(100,100);
-            hellman.generateHashTables();
+//            Hellman hellman = new Hellman();
+//            hellman.setMT(10000,100);
+//            hellman.generateHashTables();
 
+            Rainbow rainbow = new Rainbow();
+            rainbow.setMT(100,10000);
+            rainbow.generateHashTables();
             int correct = 0;
+            int i=0;
             for (Map.Entry<String, byte[]> entry : hashes.entrySet()) {
-                System.out.println(" plain: "+ entry.getKey() + " , hash: \t\t\t\t\t\t"+new String(toHex(entry.getValue())));
-               if (Hellman.solveHash(entry.getValue())){
+                System.out.println(i++ +"        plain: "+ entry.getKey() + " , hash: \t\t\t\t\t\t"+new String(toHex(entry.getValue())));
+               if (rainbow.solveHash(entry.getValue(),i)){
                    correct++;
                }
             }

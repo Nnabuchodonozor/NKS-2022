@@ -7,8 +7,6 @@ public class Hellman extends BigClass {
     static int m, t;
 
     public Hellman() throws Exception {
-
-
     }
 
     public void setMT(int m, int t) {

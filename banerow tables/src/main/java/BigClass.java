@@ -50,7 +50,7 @@ public class BigClass {
                 newS += s;
             }
 
-            int i = parameter;
+            int i = 0;
             while (PIN.length() != 6) {
                 PIN += newS.charAt(i);
                 i = i + parameter;
