@@ -2,7 +2,7 @@
 
 
 #define BUF_SIZE 64
-#define PRINTING 1
+#define PRINTING 0
 
 char *int2bin(u_int64_t a, char *buffer, int buf_size) {
     buffer += (buf_size - 1);
@@ -36,36 +36,42 @@ u_int64_t init(u_int64_t seed){
 
 u_int64_t update(u_int64_t state, FILE * fd,long i){
     
-//18446744073709551557
+// largest 64b prime = 18446744073709551557     .. will i need it?  idfc
 
     long modulo = i % 63;
-    u_int64_t tmp = ~state;
+    u_int64_t tmp = 1 ^ state;
     printBIN(state, "0");
-    state = state << i/2;
+    state >>= (modulo % 7);
     printBIN(state, "1");
     state = state | tmp;
     printBIN(state, "2");
     tmp = ~tmp; 
     printBIN(state, "3");
-    tmp = tmp << (i % 31);
+    tmp <<= 1;
     printBIN(state, "4");
     state  = state ^ tmp;
     printBIN(state, "5");
-    state = state >> 1;
+    state >>= 1;
     printBIN(state, "6");
-    tmp = tmp & 1;
+    tmp = tmp & state;
     printBIN(state, "7");
-    state = state | tmp;
+    state <<= 3;
     printBIN(state, "8");
-    
-    // printBIN(state, "9");
-    // printBIN(state, "a");
-    // printBIN(state, "b");
-    // printBIN(state, "c");
-    // printBIN(state, "d");
-    // printBIN(state, "e");
-    // printBIN(state, "f");
-   fwrite(&state, 1, 1, fd);
+    state = state | tmp;
+    printBIN(state, "9");
+    tmp &= tmp;
+    printBIN(state, "a");
+    state =state | state; 
+    printBIN(state, "b");
+    state |=state;
+    printBIN(state, "c");
+    tmp >>= 3;
+    printBIN(state, "d");
+    state <<= 15;
+    printBIN(state, "e");
+    state = state ^ tmp;
+    printBIN(state, "f");
+    fwrite(&state, 1, 1, fd);
     return state;
 }
 
@@ -80,13 +86,24 @@ int main() {
     printBIN(seed,"first");
     u_int64_t init_seed = init(seed);
     u_int64_t tmp = 0x0LL;
-    for (long i = 0; i < 10; i++)
+    for (long i = 0; i < 1000000; i++)
     {
         tmp = update(init_seed,fd,i);
         init_seed = tmp;
+     
+        if ((i % 100000 )== 0)
+        {
+           
+       char buffer[BUF_SIZE];
+    buffer[BUF_SIZE - 1] = '\0';
+    int2bin(init_seed, buffer, BUF_SIZE - 1);
+    printf(" last = %s \n\n", buffer);
+
+        }
+        
+
     }
     
-
     fclose(fd);
 
    return 0;
