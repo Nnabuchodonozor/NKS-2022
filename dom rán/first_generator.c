@@ -1,5 +1,6 @@
 #include <stdio.h>
-
+#include <stdlib.h>
+#include <string.h>
 
 #define BUF_SIZE 64
 #define PRINTING 0
@@ -79,32 +80,42 @@ u_int64_t update(u_int64_t state, FILE * fd,long i){
 
 
 int main() {
+
+    for (uint64_t j = 0; j < 100; j++)
+    {
+        
+    
+    
     FILE * fd;
-    fd = fopen("output","wb");
-    u_int64_t seed = 0xFFFFFFFFFFFFFFFFLL;
-    //original seed printing
-    printBIN(seed,"first");
-    u_int64_t init_seed = init(seed);
+    char fname[100];
+    sprintf(fname, "%04i.dat", j);
+
+    
+    fd = fopen(fname,"wb");
+    // u_int64_t seed = 0xFFFFFFFFFFFFFFFFLL;
+    // original seed printing
+    // printBIN(seed,"first");
+    u_int64_t init_seed = init(j);
     u_int64_t tmp = 0x0LL;
     for (long i = 0; i < 1000000; i++)
     {
         tmp = update(init_seed,fd,i);
         init_seed = tmp;
      
-        if ((i % 100000 )== 0)
-        {
+    //     if ((i % 100000 )== 0)
+    //     {
            
-       char buffer[BUF_SIZE];
-    buffer[BUF_SIZE - 1] = '\0';
-    int2bin(init_seed, buffer, BUF_SIZE - 1);
-    printf(" last = %s \n\n", buffer);
+    //    char buffer[BUF_SIZE];
+    // buffer[BUF_SIZE - 1] = '\0';
+    // int2bin(init_seed, buffer, BUF_SIZE - 1);
+    // printf(" last = %s \n\n", buffer);
 
-        }
+        // }
         
 
     }
     
     fclose(fd);
-
+    }
    return 0;
 }
