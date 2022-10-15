@@ -88,7 +88,7 @@ int main() {
     
     FILE * fd;
     char fname[100];
-    sprintf(fname, "%04i.dat", j);
+    sprintf(fname, "%04i", j);
 
     
     fd = fopen(fname,"wb");
