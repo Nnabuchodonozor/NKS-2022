@@ -1,13 +1,75 @@
 #include <stdio.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <time.h>
-
+#include <string.h> 
 
 #define NR 4
 #define PRINTING 1
 #define BUF_SIZE 16
 
 uint16_t SBOX [16] = { 0x4, 0x3, 0x6, 0x2, 0xF, 0x5, 0x8, 0x9, 0xD, 0xE, 0xC, 0xB, 0xA, 0x1, 0x0, 0x7};
+char *key_permutations [NR] = {};
+
+// https://stackoverflow.com/questions/26839558/hex-char-to-int-conversion
+
+int hex2int(char ch)
+{
+    if (ch >= '0' && ch <= '9')
+        return ch - '0';
+    if (ch >= 'A' && ch <= 'F')
+        return ch - 'A' + 10;
+    if (ch >= 'a' && ch <= 'f')
+        return ch - 'a' + 10;
+    return -1;
+}
+
+//https://www.geeksforgeeks.org/write-a-c-program-to-print-all-permutations-of-a-given-string/
+
+void swap(char *x, char *y) 
+{ 
+    char temp; 
+    temp = *x; 
+    *x = *y; 
+    *y = temp; 
+} 
+
+// permutation counter with off switch when desired permutations 
+
+int permute(char *a, int l, int r, int *counter, int *final_length) 
+{     
+int i; 
+
+if (l == r) {
+    printf("%s\n", a);
+        char *x =malloc (sizeof (char) * 17);;
+    memcpy(x, a, 68 );
+    key_permutations[*counter] = x;
+
+    if(*counter == *final_length)
+    return 1;
+    else{
+    *counter = *counter+1;
+    }
+    
+    } 
+else
+{ 
+    for (i = l; i <= r; i++) 
+    { 
+        swap((a+l), (a+i)); 
+        if( permute(a, l+1, r, counter, final_length) ==1){
+            return 1;
+        } 
+        if(*counter == *final_length)
+        return 1;
+        swap((a+l), (a+i)); //backtrack 
+    } 
+
+} 
+
+return 0;
+} 
 
 char *int2bin(u_int16_t a, char *buffer, int buf_size) {
     buffer += (buf_size - 1);
@@ -65,9 +127,27 @@ void substitution(uint16_t * original){
     *original = output;
 }
 
-uint16_t transform_key(uint64_t key, int index ){
-    uint16_t output = 0;
-    return 1;
+uint16_t transform_key(uint64_t original, int index ){
+    uint16_t output = 0;                                    //for original ffff debugging output is
+     output ^= ((original) & 0x0001) << key_permutations[index][0]; // 0 -> 15   .. 32768 
+     output ^= ((original) & 0x0002) << key_permutations[index][0];; // 1 -> 2     .. 32772
+     output ^= ((original) & 0x0004) << key_permutations[index][0];; // 2 -> 11   .. 34820
+     output ^= ((original) & 0x0008) << 1; // 3-> 4     .. 34836
+     output ^= ((original) & 0x0010) << 5; // 4-> 9     .. 35348
+     output ^= ((original) & 0x0020) >> 5; // 5 -> 0    .. 35349
+     output ^= ((original) & 0x0040) << 1; // 6->7      .. 35477
+     output ^= ((original) & 0x0080) << 1; // 7->8      .. 35733
+     output ^= ((original) & 0x0100) >> 2; // 8->6      .. 35797
+     output ^= ((original) & 0x0200) << 1; // 9->10     .. 36821
+     output ^= ((original) & 0x0400) >> 9; // 10->1     .. 36823
+     output ^= ((original) & 0x8800) << 1; // 11->12    .. 40919    
+     output ^= ((original) & 0x1000) << 2; // 12->14    .. 57303
+     output ^= ((original) & 0x2000) >> 10; // 13->3    .. 57311
+     output ^= ((original) & 0x4000) >> 1; // 14->13    .. 65503
+     output ^= ((original) & 0x8000) >> 10; // 15->5    .. 65535
+
+
+    return output;
 }
 
 void SPN(uint16_t original, uint64_t k, FILE * fd){
@@ -109,11 +189,17 @@ int main(int argc, const char * argv[]) {
     //     }
     //   }
     // }
-    uint16_t a = 0xffff;
-    printBIN(a,"a");
-    
-    substitution(&a);
+    char str[] = "0123456789ABCDEF"; 
+    int counter=0;
+    int final_length = NR;
+    permute(str, 0, 15,&counter,&final_length);
 
-    printBIN(a,"");
+    for(int i = 0; i < NR; i++){
+        printf(" %s \n", key_permutations[i]);
+    }
+    // uint16_t k = 0x000A;
+    // k = transform_key(k,0);
+    int a= hex2int(key_permutations[1][15]);
+    printf(" %d \n",a);
     return 0;
 }
