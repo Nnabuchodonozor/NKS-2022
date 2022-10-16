@@ -4,8 +4,8 @@
 #include <time.h>
 #include <string.h> 
 
-#define NR 4
-#define PRINTING 1
+#define NR 10
+#define PRINTING 0
 #define BUF_SIZE 16
 
 uint16_t SBOX [16] = { 0x4, 0x3, 0x6, 0x2, 0xF, 0x5, 0x8, 0x9, 0xD, 0xE, 0xC, 0xB, 0xA, 0x1, 0x0, 0x7};
@@ -41,7 +41,7 @@ int permute(char *a, int l, int r, int *counter, int *final_length)
 int i; 
 
 if (l == r) {
-    printf("%s\n", a);
+    // printf("%s\n", a);
         char *x =malloc (sizeof (char) * 17);;
     memcpy(x, a, 68 );
     key_permutations[*counter] = x;
@@ -108,7 +108,7 @@ uint16_t transposition(uint16_t original){                 // positioning 15 14 
      output ^= ((original) & 0x0100) >> 2; // 8->6      .. 35797
      output ^= ((original) & 0x0200) << 1; // 9->10     .. 36821
      output ^= ((original) & 0x0400) >> 9; // 10->1     .. 36823
-     output ^= ((original) & 0x8800) << 1; // 11->12    .. 40919    
+     output ^= ((original) & 0x0800) << 1; // 11->12    .. 40919    
      output ^= ((original) & 0x1000) << 2; // 12->14    .. 57303
      output ^= ((original) & 0x2000) >> 10; // 13->3    .. 57311
      output ^= ((original) & 0x4000) >> 1; // 14->13    .. 65503
@@ -127,25 +127,41 @@ void substitution(uint16_t * original){
     *original = output;
 }
 
-uint16_t transform_key(uint64_t original, int index ){
-    uint16_t output = 0;                                    //for original ffff debugging output is
-     output ^= ((original) & 0x0001) << key_permutations[index][0]; // 0 -> 15   .. 32768 
-     output ^= ((original) & 0x0002) << key_permutations[index][0];; // 1 -> 2     .. 32772
-     output ^= ((original) & 0x0004) << key_permutations[index][0];; // 2 -> 11   .. 34820
-     output ^= ((original) & 0x0008) << 1; // 3-> 4     .. 34836
-     output ^= ((original) & 0x0010) << 5; // 4-> 9     .. 35348
-     output ^= ((original) & 0x0020) >> 5; // 5 -> 0    .. 35349
-     output ^= ((original) & 0x0040) << 1; // 6->7      .. 35477
-     output ^= ((original) & 0x0080) << 1; // 7->8      .. 35733
-     output ^= ((original) & 0x0100) >> 2; // 8->6      .. 35797
-     output ^= ((original) & 0x0200) << 1; // 9->10     .. 36821
-     output ^= ((original) & 0x0400) >> 9; // 10->1     .. 36823
-     output ^= ((original) & 0x8800) << 1; // 11->12    .. 40919    
-     output ^= ((original) & 0x1000) << 2; // 12->14    .. 57303
-     output ^= ((original) & 0x2000) >> 10; // 13->3    .. 57311
-     output ^= ((original) & 0x4000) >> 1; // 14->13    .. 65503
-     output ^= ((original) & 0x8000) >> 10; // 15->5    .. 65535
-
+uint16_t transform_key(uint16_t original, int index ){          // transpose bits in key based on lexicographical permutation on original key
+    uint16_t output = 0;                                    
+     printBIN(output," -1 ");
+     output ^= ((original) & 0x0001) << hex2int(key_permutations[index][0]);  
+     printBIN(output," 0 ");
+     output ^= (((original) & 0x0002) >> 1) << hex2int(key_permutations[index][1]); 
+     printBIN(output," 1 ");
+     output ^= (((original) & 0x0004) >> 2) << hex2int(key_permutations[index][2]); 
+     printBIN(output," 2 ");
+     output ^= (((original) & 0x0008) >> 3) << hex2int(key_permutations[index][3]); 
+     printBIN(output," 3 ");
+     output ^= (((original) & 0x0010) >> 4) << hex2int(key_permutations[index][4]); 
+     printBIN(output," 4 ");
+     output ^= (((original) & 0x0020) >> 5) << hex2int(key_permutations[index][5]); 
+     printBIN(output," 5 ");
+     output ^= (((original) & 0x0040) >> 6) << hex2int(key_permutations[index][6]); 
+     printBIN(output," 6 ");
+     output ^= (((original) & 0x0080) >> 7) << hex2int(key_permutations[index][7]); 
+     printBIN(output," 7 ");
+     output ^= (((original) & 0x0100) >> 8) << hex2int(key_permutations[index][8]); 
+     printBIN(output," 8 ");
+     output ^= (((original) & 0x0200) >> 9) << hex2int(key_permutations[index][9]); 
+     printBIN(output," 9 ");
+     output ^= (((original) & 0x0400) >> 10) << hex2int(key_permutations[index][10]); 
+     printBIN(output," a ");
+     output ^= (((original) & 0x0800) >> 11) << hex2int(key_permutations[index][11]);     
+     printBIN(output," b ");
+     output ^= (((original) & 0x1000) >> 12) << hex2int(key_permutations[index][12]); 
+     printBIN(output," c ");
+     output ^= (((original) & 0x2000) >> 13) << hex2int(key_permutations[index][13]);
+     printBIN(output," d ");
+     output ^= (((original) & 0x4000) >> 14) << hex2int(key_permutations[index][14]); 
+     printBIN(output," e ");
+     output ^= (((original) & 0x8000) >> 15) << hex2int(key_permutations[index][15]); 
+    printBIN(output," f ");
 
     return output;
 }
@@ -166,40 +182,36 @@ void SPN(uint16_t original, uint64_t k, FILE * fd){
 
     }
     printBIN(output,"last");
+    fwrite(&output, 2, 1, fd);
 }
 
 
 
 int main(int argc, const char * argv[]) {
-    //  uint16_t input = 0xffff;
-    //  uint16_t output = transposition(input);   
-    //  uint64_t k = 0;
-    // //100 files for testing
-    // for(int i = 0; i < 1; i++){
-    // FILE * fd;
-    // char fname[100];
-    // sprintf(fname, "%04i", i);
-    // // fd = fopen(fname,"wb");
-    // // 8 keys for file to have >1MB
-    // for(; k < 1; k++){
-    //     // every single possible open text for 16b
-    //     for(uint16_t x = 0; x < 0x0001; x++)
-    //     {
-    //         SPN(x,k,fd);
-    //     }
-    //   }
-    // }
     char str[] = "0123456789ABCDEF"; 
     int counter=0;
     int final_length = NR;
-    permute(str, 0, 15,&counter,&final_length);
+    permute(str, 0, 15, &counter, &final_length);
 
-    for(int i = 0; i < NR; i++){
-        printf(" %s \n", key_permutations[i]);
+    
+    //100 files for testing
+    uint16_t key = 0xabcd;
+    for(int i = 0; i < 100; i++){
+    printf(" %d \n",i);
+    FILE * fd;
+    char fname[100];
+    sprintf(fname, "%04i.bin", i);
+    fd = fopen(fname,"wb");
+    // 8 keys for file to have >1MB
+    for(int k = 0; k < 8; k++){
+        // every single possible open text for 16b
+        for(uint16_t x = 0x0000; x < 0xffff; x++)
+        {
+            SPN(x,key,fd);
+            key = key + 1;
+        }
+      }
     }
-    // uint16_t k = 0x000A;
-    // k = transform_key(k,0);
-    int a= hex2int(key_permutations[1][15]);
-    printf(" %d \n",a);
+  
     return 0;
 }
