@@ -4,7 +4,7 @@
 #include <time.h>
 #include <string.h> 
 
-#define NR 10
+#define NR 4
 #define PRINTING 0
 #define BUF_SIZE 16
 
@@ -188,6 +188,7 @@ void SPN(uint16_t original, uint64_t k, FILE * fd){
 
 
 int main(int argc, const char * argv[]) {
+    double clk = -clock();
     char str[] = "0123456789ABCDEF"; 
     int counter=0;
     int final_length = NR;
@@ -212,6 +213,6 @@ int main(int argc, const char * argv[]) {
         }
       }
     }
-  
+    printf(" T = %0.6lf s\n", clk/CLOCKS_PER_SEC);
     return 0;
 }
