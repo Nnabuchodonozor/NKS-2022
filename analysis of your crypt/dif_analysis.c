@@ -204,16 +204,36 @@ void print2D(int tab[16][16]){
 }
 
 void dif_table() {
-    int table[16][16] ;
+    int table[16][16] = {0} ;
     for(uint16_t a = 0x0; a<= 0xf; a++){
-        for (uint16_t b = 0x0; b <= 0xb; b++)
+        uint16_t x1[16];
+        uint16_t y[16];
+        uint16_t y1[16];
+        uint16_t bigY[16];
+        for (uint16_t b = 0x0; b <= 0xf; b++)
         {
-            uint16_t c = TestSBOX[(a>>0)&0xf];
-            printBIN(c,"");
+            x1[b]=a ^ b;
+            y[b]= TestSBOX[(b>>0)&0xf];
+            y1[b]=TestSBOX[(x1[b]>>0)&0xf];
+            bigY[b]=y[b] ^ y1[b];
+
         }
-                    
+        for (uint16_t i = 0x0; i <= 0xf; i++)
+        {
+            table[a][bigY[i]]+=1; 
+            
+            // for (uint16_t j = 0; j <= 16; j++)
+            // {
+            //     if(bigY[j]==i){
+            //         table[a][i] = table[a][i] +1; 
+            //     }
+            // }
+            
+        }
+                            
     }
 
+    print2D(table);
 
     
 }
