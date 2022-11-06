@@ -131,6 +131,15 @@ void substitution(uint16_t * original){
     *original = output;
 }
 
+void inv_sbox(uint16_t * original){
+    uint16_t output = 0;
+    output = (INV_SBOX[(*original>>0)&0xf] << 0) ^ 
+            (INV_SBOX[(*original>>4)&0xf] << 4) ^
+            (INV_SBOX[(*original>>8)&0xf] << 8) ^
+            (INV_SBOX[(*original>>12)&0xf] << 12);
+    *original = output;
+}
+
 uint16_t transform_key(uint16_t original, int index ){          // transpose bits in key based on lexicographical permutation on original key
     uint16_t output = 0;                                    
      printBIN(output," -1 ");
@@ -213,8 +222,8 @@ void dif_table() {
         for (uint16_t b = 0x0; b <= 0xf; b++)
         {
             x1[b]=a ^ b;
-            y[b]= TestSBOX[(b>>0)&0xf];
-            y1[b]=TestSBOX[(x1[b]>>0)&0xf];
+            y[b]= SBOX[(b>>0)&0xf];
+            y1[b]=SBOX[(x1[b]>>0)&0xf];
             bigY[b]=y[b] ^ y1[b];
 
         }
@@ -238,7 +247,33 @@ void dif_table() {
     
 }
 
+void dif_solve(){
 
+int count[16][16][16][16] = {0};
+
+
+uint16_t x; 
+uint16_t x1;
+uint16_t y; 
+uint16_t y1;
+
+
+for (uint8_t a = 0x0; a <= 0xf; a++)
+{
+    for (uint8_t b = 0x0; b <= 0xf; b++)
+    {   
+        for (uint8_t c = 0x0; c <= 0xf; c++)
+        {
+            for (uint8_t d = 0x0; d <= 0xf; d++)
+            {
+
+            }
+        }
+    }
+}
+
+
+}
 int main(int argc, const char * argv[]) {
     // double clk = -clock();
     // char str[] = "0123456789ABCDEF"; 
@@ -266,6 +301,10 @@ int main(int argc, const char * argv[]) {
     //   }
     // }
     // printf(" T = %0.6lf s\n", clk/CLOCKS_PER_SEC);
-    dif_table();
+    
+    
+    
+    // dif_table();
+    dif_solve();
     return 0;
 }
