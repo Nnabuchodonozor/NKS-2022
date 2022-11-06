@@ -28,52 +28,6 @@ int hex2int(char ch)
     return -1;
 }
 
-//https://www.geeksforgeeks.org/write-a-c-program-to-print-all-permutations-of-a-given-string/
-
-void swap(char *x, char *y) 
-{ 
-    char temp; 
-    temp = *x; 
-    *x = *y; 
-    *y = temp; 
-} 
-
-// permutation counter with off switch when desired permutations 
-
-int permute(char *a, int l, int r, int *counter, int *final_length) 
-{     
-int i; 
-
-if (l == r) {
-    // printf("%s\n", a);
-        char *x =malloc (sizeof (char) * 17);;
-    memcpy(x, a, 68 );
-    key_permutations[*counter] = x;
-
-    if(*counter == *final_length)
-    return 1;
-    else{
-    *counter = *counter+1;
-    }
-    
-    } 
-else
-{ 
-    for (i = l; i <= r; i++) 
-    { 
-        swap((a+l), (a+i)); 
-        if( permute(a, l+1, r, counter, final_length) ==1){
-            return 1;
-        } 
-        if(*counter == *final_length)
-        return 1;
-        swap((a+l), (a+i)); //backtrack 
-    } 
-
-} 
-
-return 0;
-} 
 
 char *int2bin(u_int16_t a, char *buffer, int buf_size) {
     buffer += (buf_size - 1);
@@ -247,15 +201,14 @@ void dif_table() {
     
 }
 
-void dif_solve(){
+void dif_solve(uint16_t y, uint16_t y1){
 
 int count[16][16][16][16] = {0};
 
 
 uint16_t x; 
 uint16_t x1;
-uint16_t y; 
-uint16_t y1;
+
 
 
 for (uint8_t a = 0x0; a <= 0xf; a++)
@@ -266,12 +219,35 @@ for (uint8_t a = 0x0; a <= 0xf; a++)
         {
             for (uint8_t d = 0x0; d <= 0xf; d++)
             {
+                uint16_t v1 = (a & 0xf) ^ ((y>>12)&0xf);
+                uint16_t v2 = (b & 0xf) ^ ((y>>8)&0xf);
+                uint16_t v3 = (c & 0xf) ^ ((y>>4)&0xf);
+                uint16_t v4 = (d & 0xf) ^ ((y>>0)&0xf);    
+                inv_sbox(v1);
+                inv_sbox(v2);
+                inv_sbox(v3);
+                inv_sbox(v4);
+                uint16_t V1 = (a & 0xf) ^ ((y1>>12)&0xf);
+                uint16_t V2 = (b & 0xf) ^ ((y1>>8)&0xf);
+                uint16_t V3 = (c & 0xf) ^ ((y1>>4)&0xf);
+                uint16_t V4 = (d & 0xf) ^ ((y1>>0)&0xf);    
+                inv_sbox(V1);
+                inv_sbox(V2);
+                inv_sbox(V3);
+                inv_sbox(V4);
+                uint16_t u1 = (V1 & 0xf) ^ (v1 & 0xf); 
+                uint16_t u2 = (V2 & 0xf) ^ (v2 & 0xf);
+                uint16_t u3 = (V3 & 0xf) ^ (v3 & 0xf);
+                uint16_t u4 = (V4 & 0xf) ^ (v4 & 0xf); 
+                if(((u1 & 0xf ) == 0xB)&&((u2 & 0xf) == 0x1)&&((u3 & 0xf ) == 0x1)&&((u4 & 0xf ) == 0x9)){
+                    count[a][b][c][d] += 1;
+                }
 
             }
         }
     }
 }
-
+return;
 
 }
 int main(int argc, const char * argv[]) {
@@ -305,6 +281,30 @@ int main(int argc, const char * argv[]) {
     
     
     // dif_table();
-    dif_solve();
+    // dif_solve();
+    FILE * fd;
+    fd = fopen("92202.f2b490786a1ce3d5.dat","r");
+    uint16_t Inputs [10000];
+    char buffer[255];
+    for(int i = 0; i < 10000; i++){
+        fgets(buffer, 255, fd);
+        Inputs[i] = strtol(buffer, NULL, 16);
+    }
+    uint16_t input_difference = 0x3881;
+    for (uint16_t i = 0; i < 10000; i++)
+    {
+        for (uint16_t j = 0; j < 10000; j++)
+        {
+        
+        if(i ^ j == input_difference){
+            dif_solve(Inputs[i],Inputs[j]);
+        }
+
+
+        }
+    }
+    
+    
+
     return 0;
 }
