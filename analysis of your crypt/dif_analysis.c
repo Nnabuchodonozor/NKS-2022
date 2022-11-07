@@ -87,10 +87,7 @@ void substitution(uint16_t * original){
 
 void inv_sbox(uint16_t * original){
     uint16_t output = 0;
-    output = (INV_SBOX[(*original>>0)&0xf] << 0) ^ 
-            (INV_SBOX[(*original>>4)&0xf] << 4) ^
-            (INV_SBOX[(*original>>8)&0xf] << 8) ^
-            (INV_SBOX[(*original>>12)&0xf] << 12);
+    output = (INV_SBOX[(*original)&0xf]);
     *original = output;
 }
 
@@ -201,15 +198,7 @@ void dif_table() {
     
 }
 
-void dif_solve(uint16_t y, uint16_t y1){
-
-int count[16][16][16][16] = {0};
-
-
-uint16_t x; 
-uint16_t x1;
-
-
+void dif_solve(int* count[16][16][16][16],uint16_t y, uint16_t y1){
 
 for (uint8_t a = 0x0; a <= 0xf; a++)
 {
@@ -223,18 +212,18 @@ for (uint8_t a = 0x0; a <= 0xf; a++)
                 uint16_t v2 = (b & 0xf) ^ ((y>>8)&0xf);
                 uint16_t v3 = (c & 0xf) ^ ((y>>4)&0xf);
                 uint16_t v4 = (d & 0xf) ^ ((y>>0)&0xf);    
-                inv_sbox(v1);
-                inv_sbox(v2);
-                inv_sbox(v3);
-                inv_sbox(v4);
+                inv_sbox(&v1);
+                inv_sbox(&v2);
+                inv_sbox(&v3);
+                inv_sbox(&v4);
                 uint16_t V1 = (a & 0xf) ^ ((y1>>12)&0xf);
                 uint16_t V2 = (b & 0xf) ^ ((y1>>8)&0xf);
                 uint16_t V3 = (c & 0xf) ^ ((y1>>4)&0xf);
                 uint16_t V4 = (d & 0xf) ^ ((y1>>0)&0xf);    
-                inv_sbox(V1);
-                inv_sbox(V2);
-                inv_sbox(V3);
-                inv_sbox(V4);
+                inv_sbox(&V1);
+                inv_sbox(&V2);
+                inv_sbox(&V3);
+                inv_sbox(&V4);
                 uint16_t u1 = (V1 & 0xf) ^ (v1 & 0xf); 
                 uint16_t u2 = (V2 & 0xf) ^ (v2 & 0xf);
                 uint16_t u3 = (V3 & 0xf) ^ (v3 & 0xf);
@@ -250,6 +239,7 @@ for (uint8_t a = 0x0; a <= 0xf; a++)
 return;
 
 }
+
 int main(int argc, const char * argv[]) {
     // double clk = -clock();
     // char str[] = "0123456789ABCDEF"; 
@@ -282,28 +272,58 @@ int main(int argc, const char * argv[]) {
     
     // dif_table();
     // dif_solve();
+
+
+    double clk = -clock();
+
     FILE * fd;
     fd = fopen("92202.f2b490786a1ce3d5.dat","r");
+    int count[16][16][16][16];
     uint16_t Inputs [10000];
     char buffer[255];
     for(int i = 0; i < 10000; i++){
         fgets(buffer, 255, fd);
         Inputs[i] = strtol(buffer, NULL, 16);
     }
-    uint16_t input_difference = 0x3881;
+    uint16_t input_difference = 0xC200;
     for (uint16_t i = 0; i < 10000; i++)
     {
         for (uint16_t j = 0; j < 10000; j++)
         {
         
-        if(i ^ j == input_difference){
-            dif_solve(Inputs[i],Inputs[j]);
+        if((i ^ j) == input_difference){
+            dif_solve(&count,Inputs[i],Inputs[j]);
         }
 
 
         }
     }
     
+    printf(" T = %0.6lf s\n", clk/CLOCKS_PER_SEC);
+    int max = -1;
+    uint16_t subkey;
+    for (uint8_t a = 0x0; a <= 0xf; a++)
+    {
+        for (uint8_t b = 0x0; b <= 0xf; b++)
+        {   
+            for (uint8_t c = 0x0; c <= 0xf; c++)
+                {
+                for (uint8_t d = 0x0; d <= 0xf; d++)
+                {
+                    if(count[a][b][c][d]>max){
+                        max = count[a][b][c][d];
+                        subkey = ((a & 0xf) << 12) ^
+                                ((b & 0xf) << 8) ^
+                                ((c & 0xf) << 4) ^
+                                ((d & 0xf) << 0);
+                    }
+                }
+            }
+        }
+    }
+    double percetange = max/10000;
+    printBIN(subkey, "subkey from last round");
+    printf(" probability %.9f \n", percetange);
     
 
     return 0;
