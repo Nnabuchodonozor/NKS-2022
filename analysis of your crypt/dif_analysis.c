@@ -228,7 +228,7 @@ for (uint8_t a = 0x0; a <= 0xf; a++)
                 uint16_t u2 = (V2 & 0xf) ^ (v2 & 0xf);
                 uint16_t u3 = (V3 & 0xf) ^ (v3 & 0xf);
                 uint16_t u4 = (V4 & 0xf) ^ (v4 & 0xf); 
-                if(((u1 & 0xf ) == 0xB)&&((u2 & 0xf) == 0x1)&&((u3 & 0xf ) == 0x1)&&((u4 & 0xf ) == 0x9)){
+                if(((u1 & 0xf ) == 0xF)&&((u2 & 0xf) == 0xF)&&((u3 & 0xf ) == 0x0)&&((u4 & 0xF ) == 0x9)){
                     count[a][b][c][d] += 1;
                 }
 
@@ -243,63 +243,64 @@ return;
 int main(int argc, const char * argv[]) {
     
     dif_table();
-    // dif_solve();
+    dif_solve();
 
 
-    // double clk = -clock();
+    double clk = -clock();
 
-    // FILE * fd;
-    // fd = fopen("92202.f2b490786a1ce3d5.dat","r");
-    // int count[16][16][16][16];
-    // uint16_t Inputs [65000];
-    // char buffer[255];
-    // for(int i = 0; i < 65000; i++){
-    //     fgets(buffer, 255, fd);
-    //     Inputs[i] = strtol(buffer, NULL, 16);
-    // }
-    // uint16_t input_difference = 0xC200;
-    // for (uint16_t i = 0; i < 65000; i++)
-    // {
-    //     //  if(i%650==0){
-    //     //     printf("%d percent",(i/650));        
-    //     // }
-    //     for (uint16_t j = 0; j < 65000; j++)
-    //     {
+    FILE * fd;
+    fd = fopen("92202.f2b490786a1ce3d5.dat","r");
+    int count[16][16][16][16];
+    uint16_t Inputs [65000];
+    char buffer[255];
+    for(int i = 0; i < 65000; i++){
+        fgets(buffer, 255, fd);
+        Inputs[i] = strtol(buffer, NULL, 16);
+    }
+    uint16_t input_difference = 0x0CC0;
+    for (uint16_t i = 0; i < 65000; i++)
+    {
+        //  if(i%650==0){
+        //     printf("%d percent",(i/650));        
+        // }
+        for (uint16_t j = 0; j < 65000; j++)
+        {
        
-    //     if((i ^ j) == input_difference){
-    //         dif_solve(count,Inputs[i],Inputs[j]);
-    //     }
+        if((i ^ j) == input_difference){
+            dif_solve(count,Inputs[i],Inputs[j]);
+        }
 
 
-    //     }
-    // }
+        }
+    }
     
-    // printf(" T = %0.6lf s\n", clk/CLOCKS_PER_SEC);
-    // int max = -1;
-    // uint16_t subkey;
-    // for (uint8_t a = 0x0; a <= 0xf; a++)
-    // {
-    //     for (uint8_t b = 0x0; b <= 0xf; b++)
-    //     {   
-    //         for (uint8_t c = 0x0; c <= 0xf; c++)
-    //             {
-    //             for (uint8_t d = 0x0; d <= 0xf; d++)
-    //             {
-    //                 if(count[a][b][c][d]>max){
-    //                     max = count[a][b][c][d];
-    //                     subkey = ((a & 0xf) << 12) ^
-    //                             ((b & 0xf) << 8) ^
-    //                             ((c & 0xf) << 4) ^
-    //                             ((d & 0xf) << 0);
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
-    // double percetange = max/65000;
-    // printBIN(subkey, "subkey from last round");
-    // printf(" probability %.9f \n", percetange);
+    printf(" T = %0.6lf s\n", clk/CLOCKS_PER_SEC);
+    int max = -1;
+    uint16_t subkey;
+    for (uint8_t a = 0x0; a <= 0xf; a++)
+    {
+        for (uint8_t b = 0x0; b <= 0xf; b++)
+        {   
+            for (uint8_t c = 0x0; c <= 0xf; c++)
+                {
+                for (uint8_t d = 0x0; d <= 0xf; d++)
+                {
+                    if(count[a][b][c][d]>max){
+                        max = count[a][b][c][d];
+                        subkey = ((a & 0xf) << 12) ^
+                                ((b & 0xf) << 8) ^
+                                ((c & 0xf) << 4) ^
+                                ((d & 0xf) << 0);
+                    }
+                }
+            }
+        }
+    }
+    double percetange = max/65000;
+    printBIN(subkey, "subkey from last round");
+    printf(" probability %.9f \n", percetange);
        
+
 
 
     return 0;
