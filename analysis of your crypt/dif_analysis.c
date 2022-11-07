@@ -9,10 +9,10 @@
 #define BUF_SIZE 16
 
 uint16_t TestSBOX [16] = {0xE, 0x4, 0xD, 0x1, 0x2, 0xF, 0xB, 0x8, 0x3, 0xA, 0x6, 0xC, 0x5, 0x9, 0x0, 0x7} ;
-
+//f2b490786a1ce3d5
                     // 0     1    2    3    4     5   6    7    8    9   a     b    c    d    e    f
-uint16_t SBOX [16] = { 0x4, 0x3, 0x6, 0x2, 0xF, 0x5, 0x8, 0x9, 0xD, 0xE, 0xC, 0xB, 0xA, 0x1, 0x0, 0x7};
-uint16_t INV_SBOX [16] = {0xE, 0xD,0x3, 0x1, 0x0, 0x5, 0x2, 0xF, 0x6, 0x7, 0xC, 0xB, 0xA, 0x8, 0x9, 0x4  };
+uint16_t SBOX [16] = { 0xF, 0x2, 0xB, 0x4, 0x9, 0x0, 0x7, 0x8, 0x6, 0xA, 0x1, 0xC, 0xE, 0x3, 0xD, 0x5};
+uint16_t INV_SBOX [16] = {0x5, 0xA,0x1, 0xD, 0x3, 0xF, 0x8, 0x6, 0x7, 0x4, 0x9, 0x2, 0xB, 0xE, 0xC, 0x0  };
 char *key_permutations [NR] = {};
 
 // https://stackoverflow.com/questions/26839558/hex-char-to-int-conversion
@@ -198,7 +198,7 @@ void dif_table() {
     
 }
 
-void dif_solve(int* count[16][16][16][16],uint16_t y, uint16_t y1){
+void dif_solve(int count[16][16][16][16],uint16_t y, uint16_t y1){
 
 for (uint8_t a = 0x0; a <= 0xf; a++)
 {
@@ -241,90 +241,66 @@ return;
 }
 
 int main(int argc, const char * argv[]) {
-    // double clk = -clock();
-    // char str[] = "0123456789ABCDEF"; 
-    // int counter=0;
-    // int final_length = NR;
-    // permute(str, 0, 15, &counter, &final_length);
-
     
-    // //100 files for testing
-    // uint16_t key = 0xabcd;
-    // for(int i = 0; i < 100; i++){
-    // printf(" %d \n",i);
-    // FILE * fd;
-    // char fname[100];
-    // sprintf(fname, "%04i.bin", i);
-    // fd = fopen(fname,"wb");
-    // // 8 keys for file to have >1MB
-    // for(int k = 0; k < 8; k++){
-    //     // every single possible open text for 16b
-    //     for(uint16_t x = 0x0000; x < 0xffff; x++)
-    //     {
-    //         SPN(x,key,fd);
-    //         key = key + 1;
-    //     }
-    //   }
-    // }
-    // printf(" T = %0.6lf s\n", clk/CLOCKS_PER_SEC);
-    
-    
-    
-    // dif_table();
+    dif_table();
     // dif_solve();
 
 
-    double clk = -clock();
+    // double clk = -clock();
 
-    FILE * fd;
-    fd = fopen("92202.f2b490786a1ce3d5.dat","r");
-    int count[16][16][16][16];
-    uint16_t Inputs [10000];
-    char buffer[255];
-    for(int i = 0; i < 10000; i++){
-        fgets(buffer, 255, fd);
-        Inputs[i] = strtol(buffer, NULL, 16);
-    }
-    uint16_t input_difference = 0xC200;
-    for (uint16_t i = 0; i < 10000; i++)
-    {
-        for (uint16_t j = 0; j < 10000; j++)
-        {
-        
-        if((i ^ j) == input_difference){
-            dif_solve(&count,Inputs[i],Inputs[j]);
-        }
+    // FILE * fd;
+    // fd = fopen("92202.f2b490786a1ce3d5.dat","r");
+    // int count[16][16][16][16];
+    // uint16_t Inputs [65000];
+    // char buffer[255];
+    // for(int i = 0; i < 65000; i++){
+    //     fgets(buffer, 255, fd);
+    //     Inputs[i] = strtol(buffer, NULL, 16);
+    // }
+    // uint16_t input_difference = 0xC200;
+    // for (uint16_t i = 0; i < 65000; i++)
+    // {
+    //     //  if(i%650==0){
+    //     //     printf("%d percent",(i/650));        
+    //     // }
+    //     for (uint16_t j = 0; j < 65000; j++)
+    //     {
+       
+    //     if((i ^ j) == input_difference){
+    //         dif_solve(count,Inputs[i],Inputs[j]);
+    //     }
 
 
-        }
-    }
+    //     }
+    // }
     
-    printf(" T = %0.6lf s\n", clk/CLOCKS_PER_SEC);
-    int max = -1;
-    uint16_t subkey;
-    for (uint8_t a = 0x0; a <= 0xf; a++)
-    {
-        for (uint8_t b = 0x0; b <= 0xf; b++)
-        {   
-            for (uint8_t c = 0x0; c <= 0xf; c++)
-                {
-                for (uint8_t d = 0x0; d <= 0xf; d++)
-                {
-                    if(count[a][b][c][d]>max){
-                        max = count[a][b][c][d];
-                        subkey = ((a & 0xf) << 12) ^
-                                ((b & 0xf) << 8) ^
-                                ((c & 0xf) << 4) ^
-                                ((d & 0xf) << 0);
-                    }
-                }
-            }
-        }
-    }
-    double percetange = max/10000;
-    printBIN(subkey, "subkey from last round");
-    printf(" probability %.9f \n", percetange);
-    
+    // printf(" T = %0.6lf s\n", clk/CLOCKS_PER_SEC);
+    // int max = -1;
+    // uint16_t subkey;
+    // for (uint8_t a = 0x0; a <= 0xf; a++)
+    // {
+    //     for (uint8_t b = 0x0; b <= 0xf; b++)
+    //     {   
+    //         for (uint8_t c = 0x0; c <= 0xf; c++)
+    //             {
+    //             for (uint8_t d = 0x0; d <= 0xf; d++)
+    //             {
+    //                 if(count[a][b][c][d]>max){
+    //                     max = count[a][b][c][d];
+    //                     subkey = ((a & 0xf) << 12) ^
+    //                             ((b & 0xf) << 8) ^
+    //                             ((c & 0xf) << 4) ^
+    //                             ((d & 0xf) << 0);
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
+    // double percetange = max/65000;
+    // printBIN(subkey, "subkey from last round");
+    // printf(" probability %.9f \n", percetange);
+       
+
 
     return 0;
 }
