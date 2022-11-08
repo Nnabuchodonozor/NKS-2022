@@ -207,6 +207,41 @@ void dif_table() {
 
 void dif_solve(int count[16][16][16][16],uint16_t y, uint16_t y1){
 
+// this is done for when i have first subkey
+
+uint16_t first_subkey = 0xdc07;
+y = y ^ first_subkey;
+y1 = y1 ^ first_subkey;
+substitution(&y);
+substitution(&y1);
+
+
+// this is done for when i have second subkey
+
+uint16_t second_subkey = 0x5509;
+y = y ^ second_subkey;
+y1 = y1 ^ second_subkey;
+y=  transposition(y);
+y1=  transposition(y1);
+substitution(&y);
+substitution(&y1);
+
+
+
+// // this is done for when i have third subkey
+// uint16_t third_subkey = 0xdc07;
+// y = y ^ third_subkey;
+// y1 = y1 ^ third_subkey;
+// substitution(&y);
+// substitution(&y1);
+// y=  transposition(y);
+// y1=  transposition(y1);
+
+
+
+// this is done for when i have last subkey
+
+
 for (uint16_t a = 0x0; a <= 0xf; a++)
 {
     for (uint16_t b = 0x0; b <= 0xf; b++)
@@ -263,7 +298,7 @@ int main(int argc, const char * argv[]) {
         fgets(buffer, 255, fd);
         Inputs[i] = strtol(buffer, NULL, 16);
     }
-    uint16_t input_difference = 0x0CC0;
+    uint16_t input_difference = 0xFF0F;
         // uint16_t input_difference = 0xFFFF;
 
     float correct_counter = 0.0f;
