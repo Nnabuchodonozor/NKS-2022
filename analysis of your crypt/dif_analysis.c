@@ -58,36 +58,37 @@ void printBIN(u_int16_t a , char * message){
     }
 }
 
-// transposition for: f 2 b 4 9 0 7 8 6 a 1 c e 3 d 5
+// transposition changed to inverse
 uint16_t transposition(uint16_t original){                 // positioning 15 14 ... 1 0
     uint16_t output = 0;                                    //for original ffff debugging output is
-     output ^= ((original) & 0x0001) << 15; // 0 -> 15   .. 32768 
-     output ^= ((original) & 0x0002) << 1; // 1 -> 2     .. 32772
-     output ^= ((original) & 0x0004) << 9; // 2 -> 11   .. 34820
-     output ^= ((original) & 0x0008) << 1; // 3-> 4     .. 34836
-     output ^= ((original) & 0x0010) << 5; // 4-> 9     .. 35348
-     output ^= ((original) & 0x0020) >> 5; // 5 -> 0    .. 35349
-     output ^= ((original) & 0x0040) << 1; // 6->7      .. 35477
-     output ^= ((original) & 0x0080) << 1; // 7->8      .. 35733
-     output ^= ((original) & 0x0100) >> 2; // 8->6      .. 35797
-     output ^= ((original) & 0x0200) << 1; // 9->10     .. 36821
-     output ^= ((original) & 0x0400) >> 9; // 10->1     .. 36823
-     output ^= ((original) & 0x0800) << 1; // 11->12    .. 40919    
-     output ^= ((original) & 0x1000) << 2; // 12->14    .. 57303
-     output ^= ((original) & 0x2000) >> 10; // 13->3    .. 57311
-     output ^= ((original) & 0x4000) >> 1; // 14->13    .. 65503
-     output ^= ((original) & 0x8000) >> 10; // 15->5    .. 65535
+     output ^= ((original) & 0x0001); // 0 -> 15   .. 32768 
+     output ^= ((original) & 0x0002) << 3; // 1 -> 2     .. 32772
+     output ^= ((original) & 0x0004) << 6; // 2 -> 11   .. 34820
+     output ^= ((original) & 0x0008) << 9; // 3-> 4     .. 34836
+     output ^= ((original) & 0x0010) >> 3; // 4-> 9     .. 35348
+     output ^= ((original) & 0x0020); // 5 -> 0    .. 35349
+     output ^= ((original) & 0x0040) << 3; // 6->7      .. 35477
+     output ^= ((original) & 0x0080) << 6; // 7->8      .. 35733
+     output ^= ((original) & 0x0100) >> 6; // 8->6      .. 35797
+     output ^= ((original) & 0x0200) >> 3; // 9->10     .. 36821
+     output ^= ((original) & 0x0400); // 10->1     .. 36823
+     output ^= ((original) & 0x0800) << 3; // 11->12    .. 40919    
+     output ^= ((original) & 0x1000) >> 9; // 12->14    .. 57303
+     output ^= ((original) & 0x2000) >> 6; // 13->3    .. 57311
+     output ^= ((original) & 0x4000) >> 3; // 14->13    .. 65503
+     output ^= ((original) & 0x8000); // 15->5    .. 65535
 
 
     return output;
 }
 
+// substitution changed to inverse
 void substitution(uint16_t * original){
     uint16_t output = 0;
-    output = (SBOX[(*original>>0)&0xf] << 0) ^ 
-            (SBOX[(*original>>4)&0xf] << 4) ^
-            (SBOX[(*original>>8)&0xf] << 8) ^
-            (SBOX[(*original>>12)&0xf] << 12);
+    output = (INV_SBOX[(*original>>0)&0xf] << 0) ^ 
+            (INV_SBOX[(*original>>4)&0xf] << 4) ^
+            (INV_SBOX[(*original>>8)&0xf] << 8) ^
+            (INV_SBOX[(*original>>12)&0xf] << 12);
     *original = output;
 }
 
@@ -256,9 +257,9 @@ int main(int argc, const char * argv[]) {
     FILE * fd;
     fd = fopen("92202.f2b490786a1ce3d5.dat","r");
     int count[16][16][16][16] = {0};
-    uint16_t Inputs [10000];
+    uint16_t Inputs [65535];
     char buffer[255];
-    for(int i = 0; i < 10000; i++){
+    for(int i = 0; i < 65535; i++){
         fgets(buffer, 255, fd);
         Inputs[i] = strtol(buffer, NULL, 16);
     }
@@ -266,9 +267,9 @@ int main(int argc, const char * argv[]) {
         // uint16_t input_difference = 0xFFFF;
 
     float correct_counter = 0.0f;
-    for (uint16_t i = 0; i < 10000; i++)
+    for (uint16_t i = 0; i < 65535; i++)
     {
-        for (uint16_t j = 0; j < 10000; j++)
+        for (uint16_t j = 0; j < 65535; j++)
         {
         if((i ^ j) == input_difference){
             correct_counter += 1.0f;
