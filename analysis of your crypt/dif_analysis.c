@@ -6,13 +6,19 @@
 
 #define NR 4
 #define PRINTING 1
-#define BUF_SIZE 16
+#define BUF_SIZE 17
 
-uint16_t TestSBOX [16] = {0xE, 0x4, 0xD, 0x1, 0x2, 0xF, 0xB, 0x8, 0x3, 0xA, 0x6, 0xC, 0x5, 0x9, 0x0, 0x7} ;
+static struct { float count; uint16_t key; } tuple;
+// uint16_t TestSBOX [16] = {0xE, 0x4, 0xD, 0x1, 0x2, 0xF, 0xB, 0x8, 0x3, 0xA, 0x6, 0xC, 0x5, 0x9, 0x0, 0x7} ;
 //f2b490786a1ce3d5
                     // 0     1    2    3    4     5   6    7    8    9   a     b    c    d    e    f
 uint16_t SBOX [16] = { 0xF, 0x2, 0xB, 0x4, 0x9, 0x0, 0x7, 0x8, 0x6, 0xA, 0x1, 0xC, 0xE, 0x3, 0xD, 0x5};
 uint16_t INV_SBOX [16] = {0x5, 0xA,0x1, 0xD, 0x3, 0xF, 0x8, 0x6, 0x7, 0x4, 0x9, 0x2, 0xB, 0xE, 0xC, 0x0  };
+
+// uint16_t SBOX [16] = {0xE, 0x4, 0xD, 0x1, 0x2, 0xF, 0xB, 0x8, 0x3, 0xA, 0x6, 0xC, 0x5, 0x9, 0x0, 0x7};
+// uint16_t INV_SBOX [16] = {0xE, 0x3,0x4, 0x8, 0x1, 0xC, 0xA, 0xF, 0x7, 0xD, 0x9, 0x6, 0xB, 0x2, 0x0, 0x5  };
+
+
 char *key_permutations [NR] = {};
 
 // https://stackoverflow.com/questions/26839558/hex-char-to-int-conversion
@@ -200,13 +206,13 @@ void dif_table() {
 
 void dif_solve(int count[16][16][16][16],uint16_t y, uint16_t y1){
 
-for (uint8_t a = 0x0; a <= 0xf; a++)
+for (uint16_t a = 0x0; a <= 0xf; a++)
 {
-    for (uint8_t b = 0x0; b <= 0xf; b++)
+    for (uint16_t b = 0x0; b <= 0xf; b++)
     {   
-        for (uint8_t c = 0x0; c <= 0xf; c++)
+        for (uint16_t c = 0x0; c <= 0xf; c++)
         {
-            for (uint8_t d = 0x0; d <= 0xf; d++)
+            for (uint16_t d = 0x0; d <= 0xf; d++)
             {
                 uint16_t v1 = (a & 0xf) ^ ((y>>12)&0xf);
                 uint16_t v2 = (b & 0xf) ^ ((y>>8)&0xf);
@@ -228,7 +234,8 @@ for (uint8_t a = 0x0; a <= 0xf; a++)
                 uint16_t u2 = (V2 & 0xf) ^ (v2 & 0xf);
                 uint16_t u3 = (V3 & 0xf) ^ (v3 & 0xf);
                 uint16_t u4 = (V4 & 0xf) ^ (v4 & 0xf); 
-                if(((u1 & 0xf ) == 0xF)&&((u2 & 0xf) == 0xF)&&((u3 & 0xf ) == 0x0)&&((u4 & 0xF ) == 0x9)){
+                if(((u1 & 0xf ) == 0xF)&&((u2 & 0xf) == 0xF)&&((u3 & 0xf ) == 0x0)&&((u4 & 0xF ) == 0xF)){
+                // if(((u2 & 0xf) == 0x6)&&((u4 & 0xF ) == 0x6)){
                     count[a][b][c][d] += 1;
                 }
 
@@ -242,48 +249,43 @@ return;
 
 int main(int argc, const char * argv[]) {
     
-    dif_table();
-    dif_solve();
+    // dif_table();
+    // dif_solve();
 
-
-    double clk = -clock();
 
     FILE * fd;
     fd = fopen("92202.f2b490786a1ce3d5.dat","r");
-    int count[16][16][16][16];
-    uint16_t Inputs [65000];
+    int count[16][16][16][16] = {0};
+    uint16_t Inputs [10000];
     char buffer[255];
-    for(int i = 0; i < 65000; i++){
+    for(int i = 0; i < 10000; i++){
         fgets(buffer, 255, fd);
         Inputs[i] = strtol(buffer, NULL, 16);
     }
     uint16_t input_difference = 0x0CC0;
-    for (uint16_t i = 0; i < 65000; i++)
+        // uint16_t input_difference = 0xFFFF;
+
+    float correct_counter = 0.0f;
+    for (uint16_t i = 0; i < 10000; i++)
     {
-        //  if(i%650==0){
-        //     printf("%d percent",(i/650));        
-        // }
-        for (uint16_t j = 0; j < 65000; j++)
+        for (uint16_t j = 0; j < 10000; j++)
         {
-       
         if((i ^ j) == input_difference){
+            correct_counter += 1.0f;
             dif_solve(count,Inputs[i],Inputs[j]);
         }
-
-
         }
     }
     
-    printf(" T = %0.6lf s\n", clk/CLOCKS_PER_SEC);
-    int max = -1;
+    float max = -1.0f;
     uint16_t subkey;
-    for (uint8_t a = 0x0; a <= 0xf; a++)
+    for (uint16_t a = 0x0; a <= 0xf; a++)
     {
-        for (uint8_t b = 0x0; b <= 0xf; b++)
+        for (uint16_t b = 0x0; b <= 0xf; b++)
         {   
-            for (uint8_t c = 0x0; c <= 0xf; c++)
+            for (uint16_t c = 0x0; c <= 0xf; c++)
                 {
-                for (uint8_t d = 0x0; d <= 0xf; d++)
+                for (uint16_t d = 0x0; d <= 0xf; d++)
                 {
                     if(count[a][b][c][d]>max){
                         max = count[a][b][c][d];
@@ -296,9 +298,10 @@ int main(int argc, const char * argv[]) {
             }
         }
     }
-    double percetange = max/65000;
+    double percetange = max/correct_counter;
     printBIN(subkey, "subkey from last round");
-    printf(" probability %.9f \n", percetange);
+    printf("from all possible pairs (6500^2)/2 , were acceptable: %.0f",correct_counter);
+    printf(" probability %.20f \n", percetange);
        
 
 
