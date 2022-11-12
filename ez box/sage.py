@@ -51,17 +51,17 @@ def printspn(key, sb, fname):
             y = spn(x, key, sb)
             f.write('{:04x}\n'.format(y))
 
-
-'''MSK'''
-msk = 'TODO'
-
-# with open('ids.txt', 'r') as f:
-studentid = 92202
-userid, key, sb = generate(studentid, msk)
-
-sbstr = ''.join(['{:01x}'.format(y) for y in sb])
-keystr = ['{:04x}'.format(k) for k in key]
-print(userid, keystr, sbstr)
+#
+# '''MSK'''
+# # msk = 'TODO'
+#
+# # with open('ids.txt', 'r') as f:
+# studentid = 92202
+# userid, key, sb = generate(studentid, msk)
+#
+# sbstr = ''.join(['{:01x}'.format(y) for y in sb])
+# keystr = ['{:04x}'.format(k) for k in key]
+print('Hello wossrld')
 
 # fname = '.'.join([userid, sbstr, 'dat'])
 # printspn(key, sb, fname)
