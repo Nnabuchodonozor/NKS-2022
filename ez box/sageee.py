@@ -156,16 +156,38 @@ def nextGeneration(currentGen, eliteSize, mutationRate):
 
 -----------------------------		TRAINING 	--------------------------------------
 
+import matplotlib.pyplot as plt
+
+
 pop = SBoxes
 progress = []
-progress.append(1 / rankRoutes(pop)[0][1])
-generations = 2
+progress.append(rankPop(pop)[0][1])
+print(rankPop(pop)[0])
+generations = 50
+eliteSize = 20
+mutationRate = 0.03
     
 for i in range(0, generations):
     pop = nextGeneration(pop, eliteSize, mutationRate)
-    progress.append(1 / rankRoutes(pop)[0][1])
+    progress.append(rankPop(pop)[0][1])
     
 plt.plot(progress)
 plt.ylabel('Distance')
 plt.xlabel('Generation')
 plt.show()
+
+du_maxes = []
+non_lin = []
+combined = []
+for i in range(50, len(pop)):
+    SB = SBox(pop[i])
+    d = SB.differential_uniformity()
+    n = SB.nonlinearity()
+    du_maxes = np.append(du_maxes, d)
+    non_lin = np.append(non_lin, n)
+    if n == 0:
+        combined = np.append(combined, d)
+    else:
+        combined = np.append(combined, (d / n))
+        
+print(np.average(combined))
