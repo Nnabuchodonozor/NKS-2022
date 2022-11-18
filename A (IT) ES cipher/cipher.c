@@ -69,7 +69,7 @@ void substitution(uint16_t * original){
 
 //mix column difusion b0 b1 b2 b3 b4 b5 b6 b7 .. c0 c1 c2 c3 c4 c5 c6 c7
 // each bite 
-uint16_t transposition(uint16_t original){                
+uint16_t mix_col(uint16_t original){                
     uint16_t output = 0;  
     uint16_t b0 = (original & 0x8000) >> 15;
     uint16_t b1= (original & 0x4000) >> 14;
@@ -107,6 +107,30 @@ uint16_t transposition(uint16_t original){
     return output;
     }
 
+uint16_t transposition(uint16_t original){                 // positioning 15 14 ... 1 0
+    uint16_t output = 0;                                    //for original ffff debugging output is
+     output ^= ((original) & 0x0001) << 15; // 0 -> 15   .. 32768 
+     output ^= ((original) & 0x0002) << 1; // 1 -> 2     .. 32772
+     output ^= ((original) & 0x0004) << 9; // 2 -> 11   .. 34820
+     output ^= ((original) & 0x0008) << 1; // 3-> 4     .. 34836
+     output ^= ((original) & 0x0010) << 5; // 4-> 9     .. 35348
+     output ^= ((original) & 0x0020) >> 5; // 5 -> 0    .. 35349
+     output ^= ((original) & 0x0040) << 1; // 6->7      .. 35477
+     output ^= ((original) & 0x0080) << 1; // 7->8      .. 35733
+     output ^= ((original) & 0x0100) >> 2; // 8->6      .. 35797
+     output ^= ((original) & 0x0200) << 1; // 9->10     .. 36821
+     output ^= ((original) & 0x0400) >> 9; // 10->1     .. 36823
+     output ^= ((original) & 0x0800) << 1; // 11->12    .. 40919    
+     output ^= ((original) & 0x1000) << 2; // 12->14    .. 57303
+     output ^= ((original) & 0x2000) >> 10; // 13->3    .. 57311
+     output ^= ((original) & 0x4000) >> 1; // 14->13    .. 65503
+     output ^= ((original) & 0x8000) >> 10; // 15->5    .. 65535
+
+
+    return output;
+}
+
+
 // SPN modified for 2 rounds no key transformation
 uint16_t SPN(uint16_t original, uint64_t k){
     uint16_t output = 0;
@@ -124,16 +148,17 @@ uint16_t SPN(uint16_t original, uint64_t k){
     return output;
 }
 
-void dif_table() {
-    int table[16][16] = {0} ;
+void dif_profile(uint16_t key) {
+    int table[0xffff][0xffff] = {0} ;
    
-    for(uint16_t a = 0x0; a<= 0xf; a++){
+    for(uint16_t x = 0x0000; x<= 0xffff; x++){
         uint16_t x1[16];
         uint16_t y[16];
         uint16_t y1[16];
         uint16_t bigY[16];
-        for (uint16_t b = 0x0; b <= 0xf; b++)
+        for (uint16_t a = 0x0000; a <= 0xffff; a++)
         {
+            uint16_t b = (SPN(x, key) ^ SPN(x^a, key)); 
             x1[b]=a ^ b;
             // y[b]= SBOX[(b>>0)&0xf];
             // y1[b]=SBOX[(x1[b]>>0)&0xf];
