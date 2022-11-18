@@ -196,13 +196,9 @@ void dif_table() {
             //     }
             // }
             
-        }
-                            
+        }                          
     }
-
     print2D(table);
-
-    
 }
 
 void dif_solve(int count[16][16][16][16],uint16_t y, uint16_t y1){
