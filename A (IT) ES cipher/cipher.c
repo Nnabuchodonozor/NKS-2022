@@ -4,7 +4,7 @@
 #include <time.h>
 #include <string.h> 
 
-#define NR 4
+#define NR 2
 #define PRINTING 1
 #define BUF_SIZE 17
 
@@ -96,38 +96,37 @@ uint16_t transposition(uint16_t original){
     output ^= (b0 ^ b1 ^ b6)<<9;
     output ^= (b1 ^ b7)<<8;
     output ^= (c0 ^ c6)<<7;
-    output ^= (c0 ^ c6)<<6;
-    output ^= (c0 ^ c6)<<5;
-    output ^= (c0 ^ c6)<<4;
-    output ^= (c0 ^ c6)<<3;
-    output ^= (c0 ^ c6)<<2;
-    output ^= (c0 ^ c6)<<1;
-    output ^= (c0 ^ c6);
+    output ^= (c1 ^ c4 ^ c7)<<6;
+    output ^= (c2 ^ c4 ^ c5)<<5;
+    output ^= (c3 ^ c5)<<4;
+    output ^= (c2 ^ c4)<<3;
+    output ^= (c0 ^ c3 ^ c5)<<2;
+    output ^= (c0 ^ c1 ^ c6)<<1;
+    output ^= (c1 ^ c7);
     
     return output;
     }
 
-void SPN(uint16_t original, uint64_t k, FILE * fd){
+// SPN modified for 2 rounds no key transformation
+uint16_t SPN(uint16_t original, uint64_t k){
     uint16_t output = 0;
-    
+    //printBIN(output,"after xor");
     output = original ^ k;
-    printBIN(output,"after xor");
-    for(int i = 1; i < NR ; i++){
-       substitution(&output);
-       printBIN(output,"after sub");
-       output=  transposition(output);
-       printBIN(output,"after trans");    
-       
-       output = output ^ k;
-       printBIN(output,"after xor with 1");    
-
-    }
-    printBIN(output,"last");
-    fwrite(&output, 2, 1, fd);
+    substitution(&output);
+    //printBIN(output,"after sub");
+    output=  transposition(output);
+    //printBIN(output,"after trans");    
+    output = output ^ k;
+    //printBIN(output,"after xor with 1");    
+    substitution(&output);
+    output = output ^ k;
+    //printBIN(output,"last");
+    return output;
 }
 
 void dif_table() {
     int table[16][16] = {0} ;
+   
     for(uint16_t a = 0x0; a<= 0xf; a++){
         uint16_t x1[16];
         uint16_t y[16];
@@ -136,8 +135,11 @@ void dif_table() {
         for (uint16_t b = 0x0; b <= 0xf; b++)
         {
             x1[b]=a ^ b;
+            // y[b]= SBOX[(b>>0)&0xf];
+            // y1[b]=SBOX[(x1[b]>>0)&0xf];
             y[b]= SBOX[(b>>0)&0xf];
             y1[b]=SBOX[(x1[b]>>0)&0xf];
+            
             bigY[b]=y[b] ^ y1[b];
 
         }
@@ -157,10 +159,13 @@ void dif_table() {
     print2D(table);
 }
 
-int main(int argc, const char * argv[]) {
-    printf("hello world\n");
-    uint16_t input = 0xC916;
-    printBIN( transposition(input) ," mc =");
+uint16_t generate_random_key(){
+srand(time(NULL));   // Initialization, should only be called once.
+return (rand() % 0xffff );
+}
 
+
+int main(int argc, const char * argv[]) {
+    
     return 0;
 }
