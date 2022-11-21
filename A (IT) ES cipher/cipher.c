@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <time.h>
 #include <string.h> 
+#include "logger.h"
+#include <unistd.h> // notice this! you need it!
 
 #define NR 2
 #define PRINTING 1
@@ -150,17 +152,20 @@ uint16_t SPN(uint16_t original, uint64_t k){
 
 void dif_profile(uint16_t key,FILE * fd) {
         int max=0;
-        int zero_count=0;
-        for(uint16_t a = 0x0001; a<= 0xffff; a++){
+        unsigned long zero_count=0;
+        for(uint16_t a = 0x0001; a< 0xffff; a++){
         short table[0xffff] = {0} ;
         // uint16_t x1[16];
         // uint16_t y[16];
         // uint16_t y1[16];
         // uint16_t bigY[16];
+        if(a%0x40==0){
+         printf(" %d \n", (a/0x40));
+        }
         uint16_t x1;
         uint16_t x2;
         // b = x
-        for (uint16_t x = 0x0001; x <= 0xffff; x++)
+        for (uint16_t x = 0x0001; x < 0xffff; x++)
         {
             
             // x1[b]=a ^ b;
@@ -175,7 +180,7 @@ void dif_profile(uint16_t key,FILE * fd) {
             uint16_t b = x1 ^ x2;
             table[b-1]+=1;
         }
-        for (uint16_t i = 0x0001; i <= 0xffff; i++)
+        for (uint16_t i = 0x0001; i < 0xffff; i++)
         {
             if(table[i-1]==0){
                 zero_count+=1;
@@ -185,13 +190,14 @@ void dif_profile(uint16_t key,FILE * fd) {
             }
             // printf(" %d",table[i-1]);
         }
-        // printf("\n");
         // fwrite(table, sizeof(short) , sizeof(table), fd);
-
+        
     }
     // print2D(table);
+    // fprintf(fd, "%s %d", "max diff was: \n", max);
+    // fprintf(fd, "%s %d", "max number of zeros was: \n",zero_count);
     printf("max diff was: %d\n",max);
-    printf("max number of zeros was: %d\n",zero_count);
+    printf("max number of zeros was: %lu\n",zero_count);
 }
 
 uint16_t generate_random_key(){
@@ -201,15 +207,23 @@ return (rand() % 0xffff );
 
 
 int main(int argc, const char * argv[]) {
+    // char *p;
     FILE * pFile;
     uint16_t k = generate_random_key();
     // uint16_t k = 0x0000;
-    pFile =fopen("output.dat", "ab");
+    // pFile =fopen("output.dat", "wb+");
     dif_profile(k,pFile);
 
-    fclose(pFile);
 
+    // fclose(pFile);
+     
+    // uint16_t x=strtol(argv[1],&p,10);
 
-
+   
     return 0;
 }
+
+// while(1){
+//     printf("prog\n");
+//         sleep(5); // format is sleep(x); where x is # of seconds.
+//     }
