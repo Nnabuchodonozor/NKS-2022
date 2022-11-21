@@ -148,40 +148,50 @@ uint16_t SPN(uint16_t original, uint64_t k){
     return output;
 }
 
-void dif_profile(uint16_t key) {
-    int table[0xffff][0xffff] = {0} ;
-   
-    for(uint16_t x = 0x0000; x<= 0xffff; x++){
-        uint16_t x1[16];
-        uint16_t y[16];
-        uint16_t y1[16];
-        uint16_t bigY[16];
-        for (uint16_t a = 0x0000; a <= 0xffff; a++)
+void dif_profile(uint16_t key,FILE * fd) {
+        int max=0;
+        int zero_count=0;
+        for(uint16_t a = 0x0001; a<= 0xffff; a++){
+        short table[0xffff] = {0} ;
+        // uint16_t x1[16];
+        // uint16_t y[16];
+        // uint16_t y1[16];
+        // uint16_t bigY[16];
+        uint16_t x1;
+        uint16_t x2;
+        // b = x
+        for (uint16_t x = 0x0001; x <= 0xffff; x++)
         {
-            uint16_t b = (SPN(x, key) ^ SPN(x^a, key)); 
-            x1[b]=a ^ b;
-            // y[b]= SBOX[(b>>0)&0xf];
-            // y1[b]=SBOX[(x1[b]>>0)&0xf];
-            y[b]= SBOX[(b>>0)&0xf];
-            y1[b]=SBOX[(x1[b]>>0)&0xf];
             
-            bigY[b]=y[b] ^ y1[b];
-
+            // x1[b]=a ^ b;
+            // y[b]= SPN((b>>0)&0xf,key);
+            // y1[b]=SPN((x1[b]>>0)&0xf,key);
+            // bigY[b]=y[b] ^ y1[b];
+            
+            // 1. enc(x,k)
+            // uint16_t b = SPN(x,key) ^ SPN(x+a,key);
+            x1 = SPN(x,key);
+            x2 = SPN(x+a,key);
+            uint16_t b = x1 ^ x2;
+            table[b-1]+=1;
         }
-        for (uint16_t i = 0x0; i <= 0xf; i++)
+        for (uint16_t i = 0x0001; i <= 0xffff; i++)
         {
-            table[a][bigY[i]]+=1; 
-            
-            // for (uint16_t j = 0; j <= 16; j++)
-            // {
-            //     if(bigY[j]==i){
-            //         table[a][i] = table[a][i] +1; 
-            //     }
-            // }
-            
-        }                          
+            if(table[i-1]==0){
+                zero_count+=1;
+            }
+            if(table[i-1]>max){
+                max = table[i-1];
+            }
+            // printf(" %d",table[i-1]);
+        }
+        // printf("\n");
+        // fwrite(table, sizeof(short) , sizeof(table), fd);
+
     }
-    print2D(table);
+    // print2D(table);
+    printf("max diff was: %d\n",max);
+    printf("max number of zeros was: %d\n",zero_count);
 }
 
 uint16_t generate_random_key(){
@@ -191,6 +201,15 @@ return (rand() % 0xffff );
 
 
 int main(int argc, const char * argv[]) {
-    
+    FILE * pFile;
+    uint16_t k = generate_random_key();
+    // uint16_t k = 0x0000;
+    pFile =fopen("output.dat", "ab");
+    dif_profile(k,pFile);
+
+    fclose(pFile);
+
+
+
     return 0;
 }
