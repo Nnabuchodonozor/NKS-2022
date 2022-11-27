@@ -90,7 +90,7 @@ if (strcmp(method,'correlation'))
 
     chunksize=50;
     chunks=n/50;
-    for i=first:last
+    for i=1:256
       disp(i)
         for j=1:chunks
           disp(j)

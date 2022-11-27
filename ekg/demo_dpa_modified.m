@@ -63,15 +63,16 @@ if (strcmp(method,'kocher'))
     % predict the power consumption
 
     disp('Predicting the instantaneous power consumption ...');
-    power_consumption = bitget(after_sbox,2);
+    power_consumption = bitget(after_sbox, 1:8);
 
     % correlate the predicted power consumption with the real power
     % consumption
     disp('Generating the difference traces ...');
 
     for i=first:last
-
-        key_trace(i,:) = sum(traces(find(power_consumption(:,i)==1),:)) - sum(traces(find(power_consumption(:,i)==0),:));
+        c = 5
+        d = 5
+        key_trace(i,:) = sum(traces(find(power_consumption(:,i)>c),:)) - sum(traces(find(power_consumption(:,i)<d),:));
 
     end
 
