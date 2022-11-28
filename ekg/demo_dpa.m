@@ -64,7 +64,7 @@ if (strcmp(method,'kocher'))
 
     disp('Predicting the instantaneous power consumption ...');
     power_consumption = bitget(after_sbox,2);
-
+    
     % correlate the predicted power consumption with the real power
     % consumption
     disp('Generating the difference traces ...');

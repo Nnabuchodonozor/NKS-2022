@@ -52,7 +52,8 @@ key = [0:255];
 after_sbox = zeros(m,256);
 
 for i=1:m
-    after_sbox(i,:) = SubBytes(bitxor(inputs(i),key)+1);
+   % after_sbox(i,:) = SubBytes(bitxor(inputs(i),key)+1);
+    after_sbox(i,:) = bitxor(inputs(i),key)+1;
 end
 
 
@@ -63,16 +64,16 @@ if (strcmp(method,'kocher'))
     % predict the power consumption
 
     disp('Predicting the instantaneous power consumption ...');
-    power_consumption = bitget(after_sbox, 1:8);
+  bit = [1,2,3,4]
+   power_consumption = bitget(after_sbox,bit);
 
     % correlate the predicted power consumption with the real power
     % consumption
     disp('Generating the difference traces ...');
 
     for i=first:last
-        c = 5
-        d = 5
-        key_trace(i,:) = sum(traces(find(power_consumption(:,i)>c),:)) - sum(traces(find(power_consumption(:,i)<d),:));
+
+        key_trace(i,:) = sum(traces(find(power_consumption(:,i)==1),:)) - sum(traces(find(power_consumption(:,i)==0),:));
 
     end
 
@@ -91,7 +92,7 @@ if (strcmp(method,'correlation'))
 
     chunksize=50;
     chunks=n/50;
-    for i=first:last
+    for i=1:256
       disp(i)
         for j=1:chunks
           disp(j)
